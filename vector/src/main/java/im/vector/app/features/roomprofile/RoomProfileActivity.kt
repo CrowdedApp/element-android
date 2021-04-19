@@ -80,7 +80,6 @@ class RoomProfileActivity :
     }
 
     override fun injectWith(injector: ScreenComponent) {
-        super.injectWith(injector)
         injector.inject(this)
     }
 
