@@ -182,10 +182,7 @@ class RoomDetailViewModel @AssistedInject constructor(
         }
         // Inform the SDK that the room is displayed
         viewModelScope.launch {
-            try {
-                session.onRoomDisplayed(initialState.roomId)
-            } catch (_: Exception) {
-            }
+            tryOrNull { session.onRoomDisplayed(initialState.roomId) }
         }
         callManager.addPstnSupportListener(this)
         callManager.checkForPSTNSupportIfNeeded()
@@ -1092,19 +1089,13 @@ class RoomDetailViewModel @AssistedInject constructor(
 
     private fun handleRejectInvite() {
         viewModelScope.launch {
-            try {
-                room.leave(null)
-            } catch (_: Exception) {
-            }
+            tryOrNull { room.leave(null) }
         }
     }
 
     private fun handleAcceptInvite() {
         viewModelScope.launch {
-            try {
-                room.join()
-            } catch (_: Exception) {
-            }
+            tryOrNull { room.join() }
         }
     }
 
