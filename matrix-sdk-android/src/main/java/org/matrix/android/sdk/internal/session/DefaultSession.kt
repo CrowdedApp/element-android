@@ -80,7 +80,6 @@ import javax.inject.Provider
 @SessionScope
 internal class DefaultSession @Inject constructor(
         override val sessionParams: SessionParams,
-        private val sessionCoroutineScopeHolder: SessionCoroutineScopeHolder,
         private val workManagerProvider: WorkManagerProvider,
         private val globalErrorHandler: GlobalErrorHandler,
         @SessionId
@@ -163,7 +162,9 @@ internal class DefaultSession @Inject constructor(
         isOpen = true
         cryptoService.get().ensureDevice()
         uiHandler.post {
-            lifecycleObservers.forEach { it.onSessionStarted(this) }
+            lifecycleObservers.forEach {
+                it.onSessionStarted(this)
+            }
             sessionListeners.dispatch {
                 it.onSessionStarted(this)
             }
@@ -235,7 +236,9 @@ internal class DefaultSession @Inject constructor(
         stopSync()
         stopAnyBackgroundSync()
         uiHandler.post {
-            lifecycleObservers.forEach { it.onClearCache(this) }
+            lifecycleObservers.forEach {
+                it.onClearCache(this)
+            }
             sessionListeners.dispatch {
                 it.onClearCache(this)
             }
