@@ -18,6 +18,8 @@ package org.matrix.android.sdk.internal.session.pushers
 import androidx.lifecycle.LiveData
 import androidx.work.BackoffPolicy
 import com.zhuinden.monarchy.Monarchy
+import kotlinx.coroutines.launch
+import org.matrix.android.sdk.api.extensions.tryOrNull
 import org.matrix.android.sdk.api.session.pushers.Pusher
 import org.matrix.android.sdk.api.session.pushers.PushersService
 import org.matrix.android.sdk.internal.database.mapper.asDomain
@@ -26,9 +28,8 @@ import org.matrix.android.sdk.internal.database.query.where
 import org.matrix.android.sdk.internal.di.SessionDatabase
 import org.matrix.android.sdk.internal.di.SessionId
 import org.matrix.android.sdk.internal.di.WorkManagerProvider
+import org.matrix.android.sdk.internal.session.SessionCoroutineScopeHolder
 import org.matrix.android.sdk.internal.session.pushers.gateway.PushGatewayNotifyTask
-import org.matrix.android.sdk.internal.task.TaskExecutor
-import org.matrix.android.sdk.internal.task.configureWith
 import org.matrix.android.sdk.internal.worker.WorkerParamsFactory
 import java.security.InvalidParameterException
 import java.util.UUID
@@ -42,7 +43,7 @@ internal class DefaultPushersService @Inject constructor(
         private val getPusherTask: GetPushersTask,
         private val pushGatewayNotifyTask: PushGatewayNotifyTask,
         private val removePusherTask: RemovePusherTask,
-        private val taskExecutor: TaskExecutor
+        private val sessionCoroutineScopeHolder: SessionCoroutineScopeHolder
 ) : PushersService {
 
     override suspend fun testPush(url: String,
@@ -53,9 +54,9 @@ internal class DefaultPushersService @Inject constructor(
     }
 
     override fun refreshPushers() {
-        getPusherTask
-                .configureWith()
-                .executeBy(taskExecutor)
+        sessionCoroutineScopeHolder.scope.launch {
+            tryOrNull { getPusherTask.execute(Unit) }
+        }
     }
 
     override fun addHttpPusher(pushkey: String,
